@@ -586,18 +586,21 @@ const SalonDetail = () => {
 
       {/* Gallery Tab */}
       {activeTab === 'gallery' && (
-        <div className="px-5 pt-4 animate-fade-in-up" style={{ animationDuration: '250ms' }}>
-          <div className="space-y-2.5">
-            <div className="aspect-video rounded-2xl overflow-hidden card-shadow border border-border">
-              <img src={galleryImages[0]} alt="Gallery hero" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-              {galleryImages.slice(1).map((img, i) => (
-                <div key={i} className="aspect-square rounded-2xl overflow-hidden card-shadow border border-border">
-                  <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                </div>
-              ))}
-            </div>
+        <div className="px-5 pt-4 animate-fade-in-up space-y-4" style={{ animationDuration: '250ms' }}>
+          {/* Featured embed */}
+          <div className="rounded-2xl overflow-hidden card-shadow border border-border">
+            <FullEmbed media={bentoMedia[1]} />
+          </div>
+          {/* Grid of all media */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+            {bentoMedia.map((item, i) => (
+              <MediaThumbnail
+                key={i}
+                media={item}
+                onClick={() => setLightboxIndex(i)}
+                className="aspect-square rounded-2xl border border-border card-shadow"
+              />
+            ))}
           </div>
         </div>
       )}
