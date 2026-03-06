@@ -77,13 +77,14 @@ const SalonDetail = () => {
   ];
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-  /* ── Bento gallery media ── */
-  const bentoMedia = [
-    { type: 'image' as const, src: salon.image, span: 'col-span-2 row-span-2' },
-    { type: 'video' as const, src: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop', span: '' },
-    { type: 'image' as const, src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=400&fit=crop', span: '' },
-    { type: 'video' as const, src: 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=400&h=400&fit=crop', span: '' },
-    { type: 'image' as const, src: 'https://images.unsplash.com/photo-1521590832167-7228fcaeb733?w=400&h=400&fit=crop', span: '' },
+  /* ── Bento gallery media — real embeddable URLs ── */
+  const bentoMedia: MediaSource[] = [
+    { type: 'image', src: salon.image },
+    { type: 'youtube', videoId: 'D0UnqGm_miA', thumbnail: 'https://i.ytimg.com/vi/D0UnqGm_miA/hqdefault.jpg' },
+    { type: 'instagram-reel', reelId: 'C1234example', thumbnail: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=400&fit=crop' },
+    { type: 'youtube', videoId: 'Mv7TC6sav6E', thumbnail: 'https://i.ytimg.com/vi/Mv7TC6sav6E/hqdefault.jpg' },
+    { type: 'instagram-post', postId: 'CxYZexample', thumbnail: 'https://images.unsplash.com/photo-1521590832167-7228fcaeb733?w=400&h=400&fit=crop' },
+    { type: 'image', src: 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=400&h=400&fit=crop' },
   ];
 
   /* ── Hero carousel state ── */
