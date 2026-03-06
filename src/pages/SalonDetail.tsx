@@ -371,38 +371,76 @@ const SalonDetail = () => {
             <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
               <div className="flex gap-2.5 w-max pb-1">
                 {bentoMedia.map((item, i) => (
-                  <div
+                  <MediaThumbnail
                     key={i}
+                    media={item}
                     onClick={() => setLightboxIndex(i)}
-                    className="relative flex-shrink-0 w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-xl overflow-hidden border border-border/50 group cursor-pointer active:scale-[0.97] transition-transform duration-200"
-                  >
-                    <BentoThumb src={item.src} alt={`Media ${i + 1}`} />
-                    {item.type === 'video' && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-foreground/20 group-hover:bg-foreground/30 transition-colors">
-                        <div className="w-9 h-9 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                          <Play size={14} className="text-foreground ml-0.5" fill="currentColor" />
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-foreground/40 to-transparent" />
-                    <span className="absolute bottom-1.5 left-2 text-[10px] font-heading font-medium text-primary-foreground drop-shadow-sm">
-                      {item.type === 'video' ? 'Video' : `Photo ${i + 1}`}
-                    </span>
-                  </div>
+                    className="flex-shrink-0 w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-xl border border-border/50"
+                  />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Lightbox */}
+          {/* Embed Lightbox */}
           {lightboxIndex !== null && (
-            <MediaLightbox
-              open
-              onClose={() => setLightboxIndex(null)}
-              items={bentoMedia}
-              activeIndex={lightboxIndex}
-              onChangeIndex={setLightboxIndex}
-            />
+            <div className="fixed inset-0 z-[100] flex flex-col bg-foreground/95 backdrop-blur-2xl animate-fade-in">
+              {/* Top bar */}
+              <div className="flex items-center justify-between px-5 pt-[max(env(safe-area-inset-top),16px)] pb-3">
+                <span className="text-primary-foreground/50 text-[13px] font-heading font-medium">
+                  {lightboxIndex + 1} / {bentoMedia.length}
+                </span>
+                <button
+                  onClick={() => setLightboxIndex(null)}
+                  className="w-10 h-10 rounded-full bg-primary-foreground/10 backdrop-blur-md flex items-center justify-center border border-primary-foreground/10 active:scale-90 transition-all min-h-[44px] min-w-[44px]"
+                  aria-label="Close"
+                >
+                  <span className="text-primary-foreground text-lg">✕</span>
+                </button>
+              </div>
+
+              {/* Embed content */}
+              <div className="flex-1 flex items-center justify-center px-5 min-h-0">
+                <div className="w-full max-w-[88vw] md:max-w-[60vw]">
+                  <FullEmbed media={bentoMedia[lightboxIndex]} />
+                </div>
+              </div>
+
+              {/* Thumbnail strip */}
+              <div className="flex-shrink-0 px-4 pb-[max(env(safe-area-inset-bottom),24px)] pt-4">
+                <div className="flex gap-2.5 justify-center items-center overflow-x-auto scrollbar-hide py-1">
+                  {bentoMedia.map((item, i) => {
+                    const isActive = i === lightboxIndex;
+                    const thumb =
+                      item.type === 'youtube'
+                        ? item.thumbnail || `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`
+                        : item.type === 'instagram-reel'
+                        ? item.thumbnail
+                        : item.type === 'instagram-post'
+                        ? item.thumbnail
+                        : item.src;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setLightboxIndex(i)}
+                        className={`relative flex-shrink-0 overflow-hidden transition-all duration-250 ease-out ${
+                          isActive
+                            ? 'w-[56px] h-[56px] rounded-2xl ring-2 ring-primary-foreground ring-offset-2 ring-offset-transparent scale-110'
+                            : 'w-[44px] h-[44px] rounded-xl opacity-40 hover:opacity-70'
+                        }`}
+                      >
+                        <img src={thumb} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                        {(item.type === 'youtube' || item.type === 'instagram-reel') && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <Play size={12} className="text-primary-foreground" fill="white" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ── About Text ── */}
