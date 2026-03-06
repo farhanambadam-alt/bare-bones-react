@@ -173,4 +173,4 @@ export const FullEmbed = ({
   }
 };
 
-export default EmbeddedMedia;
+// Named exports only: MediaThumbnail, FullEmbed, MediaSource
