@@ -4,7 +4,7 @@ import ReviewsSection from '@/components/ReviewsSection';
 import { useNavigate, useParams } from 'react-router-dom';
 import { featuredSalons, nearbySalons, services, artists, reviews } from '@/data/mockData';
 import { useGender } from '@/contexts/GenderContext';
-import MediaLightbox from '@/components/MediaLightbox';
+import { MediaThumbnail, FullEmbed, type MediaSource } from '@/components/EmbeddedMedia';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /* ── service image map ── */
@@ -77,13 +77,14 @@ const SalonDetail = () => {
   ];
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-  /* ── Bento gallery media ── */
-  const bentoMedia = [
-    { type: 'image' as const, src: salon.image, span: 'col-span-2 row-span-2' },
-    { type: 'video' as const, src: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop', span: '' },
-    { type: 'image' as const, src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=400&fit=crop', span: '' },
-    { type: 'video' as const, src: 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=400&h=400&fit=crop', span: '' },
-    { type: 'image' as const, src: 'https://images.unsplash.com/photo-1521590832167-7228fcaeb733?w=400&h=400&fit=crop', span: '' },
+  /* ── Bento gallery media — real embeddable URLs ── */
+  const bentoMedia: MediaSource[] = [
+    { type: 'image', src: salon.image },
+    { type: 'youtube', videoId: 'D0UnqGm_miA', thumbnail: 'https://i.ytimg.com/vi/D0UnqGm_miA/hqdefault.jpg' },
+    { type: 'instagram-reel', reelId: 'C1234example', thumbnail: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=400&fit=crop' },
+    { type: 'youtube', videoId: 'Mv7TC6sav6E', thumbnail: 'https://i.ytimg.com/vi/Mv7TC6sav6E/hqdefault.jpg' },
+    { type: 'instagram-post', postId: 'CxYZexample', thumbnail: 'https://images.unsplash.com/photo-1521590832167-7228fcaeb733?w=400&h=400&fit=crop' },
+    { type: 'image', src: 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=400&h=400&fit=crop' },
   ];
 
   /* ── Hero carousel state ── */
@@ -370,38 +371,76 @@ const SalonDetail = () => {
             <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
               <div className="flex gap-2.5 w-max pb-1">
                 {bentoMedia.map((item, i) => (
-                  <div
+                  <MediaThumbnail
                     key={i}
+                    media={item}
                     onClick={() => setLightboxIndex(i)}
-                    className="relative flex-shrink-0 w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-xl overflow-hidden border border-border/50 group cursor-pointer active:scale-[0.97] transition-transform duration-200"
-                  >
-                    <BentoThumb src={item.src} alt={`Media ${i + 1}`} />
-                    {item.type === 'video' && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-foreground/20 group-hover:bg-foreground/30 transition-colors">
-                        <div className="w-9 h-9 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                          <Play size={14} className="text-foreground ml-0.5" fill="currentColor" />
-                        </div>
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-foreground/40 to-transparent" />
-                    <span className="absolute bottom-1.5 left-2 text-[10px] font-heading font-medium text-primary-foreground drop-shadow-sm">
-                      {item.type === 'video' ? 'Video' : `Photo ${i + 1}`}
-                    </span>
-                  </div>
+                    className="flex-shrink-0 w-[140px] h-[140px] md:w-[160px] md:h-[160px] rounded-xl border border-border/50"
+                  />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Lightbox */}
+          {/* Embed Lightbox */}
           {lightboxIndex !== null && (
-            <MediaLightbox
-              open
-              onClose={() => setLightboxIndex(null)}
-              items={bentoMedia}
-              activeIndex={lightboxIndex}
-              onChangeIndex={setLightboxIndex}
-            />
+            <div className="fixed inset-0 z-[100] flex flex-col bg-foreground/95 backdrop-blur-2xl animate-fade-in">
+              {/* Top bar */}
+              <div className="flex items-center justify-between px-5 pt-[max(env(safe-area-inset-top),16px)] pb-3">
+                <span className="text-primary-foreground/50 text-[13px] font-heading font-medium">
+                  {lightboxIndex + 1} / {bentoMedia.length}
+                </span>
+                <button
+                  onClick={() => setLightboxIndex(null)}
+                  className="w-10 h-10 rounded-full bg-primary-foreground/10 backdrop-blur-md flex items-center justify-center border border-primary-foreground/10 active:scale-90 transition-all min-h-[44px] min-w-[44px]"
+                  aria-label="Close"
+                >
+                  <span className="text-primary-foreground text-lg">✕</span>
+                </button>
+              </div>
+
+              {/* Embed content */}
+              <div className="flex-1 flex items-center justify-center px-5 min-h-0">
+                <div className="w-full max-w-[88vw] md:max-w-[60vw]">
+                  <FullEmbed media={bentoMedia[lightboxIndex]} />
+                </div>
+              </div>
+
+              {/* Thumbnail strip */}
+              <div className="flex-shrink-0 px-4 pb-[max(env(safe-area-inset-bottom),24px)] pt-4">
+                <div className="flex gap-2.5 justify-center items-center overflow-x-auto scrollbar-hide py-1">
+                  {bentoMedia.map((item, i) => {
+                    const isActive = i === lightboxIndex;
+                    const thumb =
+                      item.type === 'youtube'
+                        ? item.thumbnail || `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`
+                        : item.type === 'instagram-reel'
+                        ? item.thumbnail
+                        : item.type === 'instagram-post'
+                        ? item.thumbnail
+                        : item.src;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setLightboxIndex(i)}
+                        className={`relative flex-shrink-0 overflow-hidden transition-all duration-250 ease-out ${
+                          isActive
+                            ? 'w-[56px] h-[56px] rounded-2xl ring-2 ring-primary-foreground ring-offset-2 ring-offset-transparent scale-110'
+                            : 'w-[44px] h-[44px] rounded-xl opacity-40 hover:opacity-70'
+                        }`}
+                      >
+                        <img src={thumb} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                        {(item.type === 'youtube' || item.type === 'instagram-reel') && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                            <Play size={12} className="text-primary-foreground" fill="white" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ── About Text ── */}
@@ -547,18 +586,21 @@ const SalonDetail = () => {
 
       {/* Gallery Tab */}
       {activeTab === 'gallery' && (
-        <div className="px-5 pt-4 animate-fade-in-up" style={{ animationDuration: '250ms' }}>
-          <div className="space-y-2.5">
-            <div className="aspect-video rounded-2xl overflow-hidden card-shadow border border-border">
-              <img src={galleryImages[0]} alt="Gallery hero" className="w-full h-full object-cover" loading="lazy" />
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-              {galleryImages.slice(1).map((img, i) => (
-                <div key={i} className="aspect-square rounded-2xl overflow-hidden card-shadow border border-border">
-                  <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                </div>
-              ))}
-            </div>
+        <div className="px-5 pt-4 animate-fade-in-up space-y-4" style={{ animationDuration: '250ms' }}>
+          {/* Featured embed */}
+          <div className="rounded-2xl overflow-hidden card-shadow border border-border">
+            <FullEmbed media={bentoMedia[1]} />
+          </div>
+          {/* Grid of all media */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+            {bentoMedia.map((item, i) => (
+              <MediaThumbnail
+                key={i}
+                media={item}
+                onClick={() => setLightboxIndex(i)}
+                className="aspect-square rounded-2xl border border-border card-shadow"
+              />
+            ))}
           </div>
         </div>
       )}
